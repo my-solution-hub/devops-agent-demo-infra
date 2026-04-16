@@ -46,7 +46,7 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: .
-          soft_fail: true
+          soft_fail: false
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@v12
