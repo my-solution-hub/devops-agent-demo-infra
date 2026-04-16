@@ -1,0 +1,24 @@
+# terraform.tfvars.example — Copy to terraform.tfvars and fill in your values
+
+project_name = "aiops-demo"
+
+# Required: Your GitHub organization (or username) and repository name
+github_org  = "my-solution-hub"
+github_repo = "devops-agent-demo-infra"
+
+# Branch allowed to assume the deploy role (default: "release")
+github_branch = "release"
+
+# S3 bucket for the main project's Terraform remote state
+state_bucket_name = "aiops-demo-terraform-state-719821274597"
+
+# DynamoDB table for Terraform state locking
+state_lock_table_name = "aiops-demo-terraform-locks"
+
+# Common tags applied to all resources
+tags = {
+  Project     = "aiops-demo"
+  ManagedBy   = "terraform"
+  Component   = "oidc-bootstrap"
+  Environment = "shared"
+}
