@@ -50,8 +50,9 @@ resource "aws_iam_policy" "infra_deploy" {
         Sid    = "VPCNetworking"
         Effect = "Allow"
         Action = [
-          "ec2:CreateVpc", "ec2:DeleteVpc", "ec2:DescribeVpcs", "ec2:ModifyVpcAttribute",
+          "ec2:CreateVpc", "ec2:DeleteVpc", "ec2:DescribeVpcs", "ec2:DescribeVpcAttribute", "ec2:ModifyVpcAttribute",
           "ec2:CreateSubnet", "ec2:DeleteSubnet", "ec2:DescribeSubnets",
+          "ec2:DescribeAddressesAttribute",
           "ec2:CreateInternetGateway", "ec2:DeleteInternetGateway", "ec2:AttachInternetGateway", "ec2:DetachInternetGateway", "ec2:DescribeInternetGateways",
           "ec2:CreateNatGateway", "ec2:DeleteNatGateway", "ec2:DescribeNatGateways",
           "ec2:AllocateAddress", "ec2:ReleaseAddress", "ec2:DescribeAddresses",
