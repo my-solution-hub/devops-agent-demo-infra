@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Terraform Permission Check",
+  "description": "When Terraform files are edited, analyze the resources being created/modified and verify that the IAM deploy role in init/github/tf/iam_policies.tf has all required AWS permissions. If any permissions are missing, update the iam_policies.tf file and apply the changes using terraform apply in the init/github/tf directory (using the cloudops-demo AWS profile).",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.tf"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A Terraform file was just modified. Analyze the AWS resources being created or modified in the project's .tf files (excluding init/github/tf/). Check if the IAM deploy role policy in init/github/tf/iam_policies.tf has all the required AWS API permissions for those resources. If any permissions are missing, update init/github/tf/iam_policies.tf to add them, then run `terraform apply -auto-approve` in the init/github/tf directory to deploy the updated policy. Report what permissions were added."
+  }
+}

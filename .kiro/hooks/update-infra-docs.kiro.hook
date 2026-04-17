@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Update Infrastructure Docs",
+  "description": "When a .tf file is edited, prompts the agent to check if module READMEs, architecture docs, or the root README need updating to stay in sync with the code changes.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.tf"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A Terraform file was just edited. Check if any documentation needs updating:\n1. If a module's variables.tf or outputs.tf changed, update that module's README.md inputs/outputs tables.\n2. If resources were added or removed, update docs/architecture.md and its Mermaid diagram.\n3. If the project structure changed (new files/directories), update the project structure section in the root README.md.\n4. Verify all new resources have proper Name tags following the {project_name}-{resource_type}-{identifier} pattern.\nOnly make documentation changes that are necessary based on the actual code diff."
+  }
+}

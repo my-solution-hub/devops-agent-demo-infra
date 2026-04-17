@@ -71,6 +71,7 @@ resource "aws_iam_policy" "infra_deploy" {
           "ec2:RunInstances", "ec2:TerminateInstances", "ec2:DescribeInstances", "ec2:DescribeInstanceStatus",
           "ec2:DescribeImages", "ec2:DescribeKeyPairs",
           "ec2:DescribeInstanceTypes",
+          "ec2:CreateLaunchTemplate", "ec2:DeleteLaunchTemplate", "ec2:DescribeLaunchTemplates", "ec2:DescribeLaunchTemplateVersions", "ec2:CreateLaunchTemplateVersion",
         ]
         Resource = "*"
       },
@@ -83,6 +84,8 @@ resource "aws_iam_policy" "infra_deploy" {
           "eks:TagResource", "eks:UntagResource", "eks:ListClusters", "eks:ListNodegroups",
           "eks:CreateAccessEntry", "eks:DeleteAccessEntry", "eks:DescribeAccessEntry", "eks:ListAccessEntries",
           "eks:AssociateAccessPolicy", "eks:DisassociateAccessPolicy", "eks:ListAssociatedAccessPolicies",
+          "eks:CreateAddon", "eks:DeleteAddon", "eks:DescribeAddon", "eks:DescribeAddonVersions", "eks:UpdateAddon", "eks:DescribeAddonConfiguration",
+          "eks:AssociateIdentityProviderConfig", "eks:DisassociateIdentityProviderConfig", "eks:DescribeIdentityProviderConfig", "eks:ListIdentityProviderConfigs",
         ]
         Resource = "*"
       },
@@ -122,6 +125,10 @@ resource "aws_iam_policy" "infra_deploy" {
           "iam:TagRole", "iam:UntagRole", "iam:TagPolicy", "iam:UntagPolicy",
           "iam:CreateServiceLinkedRole",
           "iam:ListInstanceProfilesForRole",
+          "iam:CreateOpenIDConnectProvider", "iam:DeleteOpenIDConnectProvider", "iam:GetOpenIDConnectProvider",
+          "iam:TagOpenIDConnectProvider", "iam:UntagOpenIDConnectProvider",
+          "iam:AddClientIDToOpenIDConnectProvider", "iam:RemoveClientIDFromOpenIDConnectProvider",
+          "iam:UpdateOpenIDConnectProviderThumbprint",
         ]
         Resource = "*"
       },
@@ -145,6 +152,14 @@ resource "aws_iam_policy" "infra_deploy" {
           "logs:PutRetentionPolicy", "logs:DeleteRetentionPolicy",
           "logs:TagLogGroup", "logs:UntagLogGroup",
           "logs:TagResource", "logs:UntagResource", "logs:ListTagsForResource", "logs:ListTagsLogGroup",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "STSIdentity"
+        Effect = "Allow"
+        Action = [
+          "sts:GetCallerIdentity",
         ]
         Resource = "*"
       },
