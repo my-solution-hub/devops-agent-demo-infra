@@ -8,13 +8,10 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket         = "aiops-demo-terraform-state-719821274597"
-    key            = "infrastructure/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "aiops-demo-terraform-locks"
-    encrypt        = true
-  }
+  # Backend is configured per-environment via `-backend-config` at `terraform init`.
+  # See environments/<env>/backend.hcl and .github/workflows/terraform.yml.
+  # Required keys: bucket, key, region, dynamodb_table, encrypt.
+  backend "s3" {}
 }
 
 provider "aws" {

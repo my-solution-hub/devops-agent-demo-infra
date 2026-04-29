@@ -4,6 +4,14 @@
 # Actual output values will be wired when modules are added.
 
 # -----------------------------------------------------------------------------
+# ECR Outputs
+# -----------------------------------------------------------------------------
+output "ecr_repository_urls" {
+  description = "Map of service name to ECR repository URL"
+  value       = module.ecr.repository_urls
+}
+
+# -----------------------------------------------------------------------------
 # VPC Outputs
 # -----------------------------------------------------------------------------
 output "vpc_id" {
@@ -76,4 +84,22 @@ output "lambda_function_arn" {
 output "lambda_function_name" {
   description = "Name of the Lambda function"
   value       = module.lambda.function_name
+}
+
+# -----------------------------------------------------------------------------
+# AgentCore Outputs
+# -----------------------------------------------------------------------------
+output "agentcore_runtime_arn" {
+  description = "ARN of the AgentCore runtime"
+  value       = module.agentcore.agent_runtime_arn
+}
+
+output "agentcore_runtime_id" {
+  description = "Unique identifier of the AgentCore runtime"
+  value       = module.agentcore.agent_runtime_id
+}
+
+output "agentcore_ecr_repository_url" {
+  description = "ECR repository URL for the agent container image"
+  value       = module.agentcore.ecr_repository_url
 }

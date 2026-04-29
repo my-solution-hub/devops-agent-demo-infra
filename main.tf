@@ -1,4 +1,17 @@
 # =============================================================================
+# ECR — Application Container Repositories
+# =============================================================================
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  project_name = var.project_name
+  ecr_prefix   = var.ecr_prefix
+  repositories = var.ecr_repositories
+  tags         = var.tags
+}
+
+# =============================================================================
 # VPC — terraform-aws-modules/vpc/aws
 # =============================================================================
 
@@ -122,4 +135,24 @@ module "lambda" {
   memory_size        = var.lambda_memory_size
   timeout            = var.lambda_timeout
   tags               = var.tags
+}
+
+# =============================================================================
+# AgentCore — Custom Module (Bedrock AgentCore Runtime)
+# =============================================================================
+
+module "agentcore" {
+  source = "./modules/agentcore"
+
+  project_name          = var.project_name
+  vpc_id                = module.vpc.vpc_id
+  private_subnet_ids    = module.vpc.private_subnets
+  container_uri         = var.agentcore_container_uri
+  agent_runtime_name    = var.agentcore_runtime_name
+  description           = var.agentcore_description
+  protocol              = var.agentcore_protocol
+  environment_variables = var.agentcore_environment_variables
+  idle_session_timeout  = var.agentcore_idle_session_timeout
+  max_lifetime          = var.agentcore_max_lifetime
+  tags                  = var.tags
 }

@@ -180,3 +180,69 @@ resource "aws_iam_role_policy_attachment" "infra_deploy" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.infra_deploy.arn
 }
+
+# Policy 3: Bedrock AgentCore and ECR permissions
+resource "aws_iam_policy" "agentcore_deploy" {
+  name        = "${var.project_name}-agentcore-deploy"
+  description = "Permissions for deploying Bedrock AgentCore runtimes and reading ECR images"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "BedrockAgentCore"
+        Effect = "Allow"
+        Action = [
+          "bedrock-agentcore:CreateAgentRuntime",
+          "bedrock-agentcore:GetAgentRuntime",
+          "bedrock-agentcore:UpdateAgentRuntime",
+          "bedrock-agentcore:DeleteAgentRuntime",
+          "bedrock-agentcore:ListAgentRuntimes",
+          "bedrock-agentcore:ListAgentRuntimeVersions",
+          "bedrock-agentcore:CreateAgentRuntimeEndpoint",
+          "bedrock-agentcore:GetAgentRuntimeEndpoint",
+          "bedrock-agentcore:UpdateAgentRuntimeEndpoint",
+          "bedrock-agentcore:DeleteAgentRuntimeEndpoint",
+          "bedrock-agentcore:ListAgentRuntimeEndpoints",
+          "bedrock-agentcore:TagResource",
+          "bedrock-agentcore:UntagResource",
+          "bedrock-agentcore:ListTagsForResource",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ECRManagement"
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:DescribeRepositories",
+          "ecr:DescribeImages",
+          "ecr:ListImages",
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:CreateRepository",
+          "ecr:DeleteRepository",
+          "ecr:PutLifecyclePolicy",
+          "ecr:GetLifecyclePolicy",
+          "ecr:DeleteLifecyclePolicy",
+          "ecr:PutImageScanningConfiguration",
+          "ecr:GetRepositoryPolicy",
+          "ecr:SetRepositoryPolicy",
+          "ecr:DeleteRepositoryPolicy",
+          "ecr:TagResource",
+          "ecr:UntagResource",
+          "ecr:ListTagsForResource",
+        ]
+        Resource = "*"
+      },
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "agentcore_deploy" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.agentcore_deploy.arn
+}

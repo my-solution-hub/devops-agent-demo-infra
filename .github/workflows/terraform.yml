@@ -13,6 +13,9 @@ permissions:
 env:
   TF_VERSION: '1.7.0'
   AWS_REGION: 'us-east-1'
+  # Target environment for deploys from the `release` branch.
+  # Change to `prod` (or make branch-based) when ready to promote.
+  TF_ENV: 'dev'
 
 jobs:
   validate:
@@ -77,10 +80,10 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -backend-config=environments/${{ env.TF_ENV }}/backend.hcl
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -var-file=environments/${{ env.TF_ENV }}/terraform.tfvars -out=tfplan
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan

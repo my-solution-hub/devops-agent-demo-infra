@@ -22,6 +22,68 @@ variable "tags" {
 }
 
 # -----------------------------------------------------------------------------
+# ECR Repositories
+# -----------------------------------------------------------------------------
+
+variable "ecr_prefix" {
+  type        = string
+  description = "Prefix for ECR repository names (e.g. cat-demo)"
+  default     = "cat-demo"
+}
+
+variable "ecr_repositories" {
+  type = map(object({
+    description          = string
+    compute_target       = string
+    image_tag_mutability = optional(string, "MUTABLE")
+    max_image_count      = optional(number, 10)
+  }))
+  description = "Map of ECR repositories to create for application services"
+  default = {
+    api-gateway = {
+      description    = "API Gateway Service (Spring Boot)"
+      compute_target = "EKS"
+    }
+    cat-profile = {
+      description    = "Cat Profile Service (Spring Boot)"
+      compute_target = "EKS"
+    }
+    feeding-service = {
+      description    = "Feeding Service (Django)"
+      compute_target = "ECS Fargate"
+    }
+    health-monitor = {
+      description    = "Health Monitor Service (Django)"
+      compute_target = "ECS Fargate"
+    }
+    device-service = {
+      description    = "Device Service (Go)"
+      compute_target = "Lambda"
+    }
+    chatbot-ui = {
+      description    = "Chatbot UI (React)"
+      compute_target = "ECS Fargate"
+    }
+    device-simulator = {
+      description    = "Device Simulator (React)"
+      compute_target = "ECS Fargate"
+    }
+    admin-console = {
+      description    = "Admin Console (React)"
+      compute_target = "ECS Fargate"
+    }
+    langgraph-agent = {
+      description    = "LangGraph Workflow Agent (Python)"
+      compute_target = "AgentCore Runtime"
+    }
+    strands-agents = {
+      description    = "Strands Multi-Agent System (Python)"
+      compute_target = "AgentCore Runtime"
+    }
+  }
+}
+
+# -----------------------------------------------------------------------------
 # VPC / Networking
 # -----------------------------------------------------------------------------
 
@@ -207,5 +269,71 @@ variable "lambda_timeout" {
   validation {
     condition     = var.lambda_timeout >= 1 && var.lambda_timeout <= 900
     error_message = "lambda_timeout must be between 1 and 900 seconds."
+  }
+}
+
+# -----------------------------------------------------------------------------
+# AgentCore
+# -----------------------------------------------------------------------------
+
+variable "agentcore_container_uri" {
+  type        = string
+  description = "ECR URI of the agent container image for AgentCore runtime"
+  default     = ""
+}
+
+variable "agentcore_runtime_name" {
+  type        = string
+  description = "Name of the AgentCore runtime (alphanumeric and underscores, max 48 chars)"
+  default     = "aiops_demo_agent"
+
+  validation {
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9_]{0,47}$", var.agentcore_runtime_name))
+    error_message = "agentcore_runtime_name must start with a letter, contain only alphanumeric characters and underscores, and be at most 48 characters."
+  }
+}
+
+variable "agentcore_description" {
+  type        = string
+  description = "Description of the AgentCore runtime"
+  default     = "AIOps demo agent runtime"
+}
+
+variable "agentcore_protocol" {
+  type        = string
+  description = "Protocol the AgentCore runtime uses (MCP, HTTP, A2A)"
+  default     = "HTTP"
+
+  validation {
+    condition     = contains(["MCP", "HTTP", "A2A"], var.agentcore_protocol)
+    error_message = "agentcore_protocol must be one of: MCP, HTTP, A2A."
+  }
+}
+
+variable "agentcore_environment_variables" {
+  type        = map(string)
+  description = "Environment variables for the AgentCore runtime"
+  default     = {}
+}
+
+variable "agentcore_idle_session_timeout" {
+  type        = number
+  description = "Idle session timeout in seconds for AgentCore runtime (60–28800)"
+  default     = 900
+
+  validation {
+    condition     = var.agentcore_idle_session_timeout >= 60 && var.agentcore_idle_session_timeout <= 28800
+    error_message = "agentcore_idle_session_timeout must be between 60 and 28800 seconds."
+  }
+}
+
+variable "agentcore_max_lifetime" {
+  type        = number
+  description = "Maximum lifetime in seconds for AgentCore runtime instances (60–28800)"
+  default     = 28800
+
+  validation {
+    condition     = var.agentcore_max_lifetime >= 60 && var.agentcore_max_lifetime <= 28800
+    error_message = "agentcore_max_lifetime must be between 60 and 28800 seconds."
   }
 }

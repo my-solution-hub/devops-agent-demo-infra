@@ -9,6 +9,7 @@ The AIOps demo infrastructure provisions a multi-service AWS environment using T
 - **EC2** instances distributed across private subnets with IAM instance profiles
 - **ECS Fargate** cluster with an Application Load Balancer in public subnets
 - **Lambda** function attached to VPC private subnets
+- **AgentCore** Bedrock AgentCore Runtime for deploying AI agents in VPC private subnets
 
 A GitHub Actions CI/CD pipeline validates, scans, and deploys the infrastructure. Authentication to AWS uses GitHub OIDC — no long-lived credentials are stored.
 
@@ -24,6 +25,13 @@ graph TD
     subgraph "Terraform State"
         S3[S3 Backend<br/>Encrypted]
         DDB[DynamoDB<br/>State Locking]
+    end
+
+    subgraph "ECR"
+        ECR_EKS[EKS Repos<br/>api-gateway, cat-profile]
+        ECR_ECS[ECS Repos<br/>feeding-service, health-monitor<br/>chatbot-ui, device-simulator<br/>admin-console]
+        ECR_LAMBDA[Lambda Repo<br/>device-service]
+        ECR_AGENT[AgentCore Repos<br/>langgraph-agent, strands-agents]
     end
 
     subgraph "AWS VPC 10.0.0.0/16"
@@ -49,6 +57,7 @@ graph TD
 
         ALB[Application Load Balancer]
         LAMBDA[Lambda Function]
+        AGENTCORE[AgentCore Runtime]
     end
 
     REPO --> GHA
@@ -71,14 +80,42 @@ graph TD
     PRIV_A --> EC2_A
     PRIV_A --> ECS_A
     PRIV_A --> LAMBDA
+    PRIV_A --> AGENTCORE
 
     PRIV_B --> EKS_B
     PRIV_B --> EC2_B
     PRIV_B --> ECS_B
     PRIV_B --> LAMBDA
+    PRIV_B --> AGENTCORE
+
+    ECR_EKS --> EKS_A
+    ECR_EKS --> EKS_B
+    ECR_ECS --> ECS_A
+    ECR_ECS --> ECS_B
+    ECR_LAMBDA --> LAMBDA
+    ECR_AGENT --> AGENTCORE
 ```
 
 ## Module Descriptions
+
+### ECR (`./modules/ecr`)
+
+Provisions ECR repositories for all application container images. Each repository is created with scan-on-push enabled, AES256 encryption, and a lifecycle policy to retain a configurable number of images. Repositories are grouped under the `{project_name}/` prefix and tagged with their compute target for traceability.
+
+| Repository | Service | Compute Target |
+|---|---|---|
+| `cat-demo/api-gateway` | API Gateway Service (Spring Boot) | EKS |
+| `cat-demo/cat-profile` | Cat Profile Service (Spring Boot) | EKS |
+| `cat-demo/feeding-service` | Feeding Service (Django) | ECS Fargate |
+| `cat-demo/health-monitor` | Health Monitor Service (Django) | ECS Fargate |
+| `cat-demo/device-service` | Device Service (Go) | Lambda |
+| `cat-demo/chatbot-ui` | Chatbot UI (React) | ECS Fargate |
+| `cat-demo/device-simulator` | Device Simulator (React) | ECS Fargate |
+| `cat-demo/admin-console` | Admin Console (React) | ECS Fargate |
+| `cat-demo/langgraph-agent` | LangGraph Workflow Agent (Python) | AgentCore Runtime |
+| `cat-demo/strands-agents` | Strands Multi-Agent System (Python) | AgentCore Runtime |
+
+**Key resources:** ECR repositories, ECR lifecycle policies.
 
 ### VPC (`terraform-aws-modules/vpc/aws ~> 5.0`)
 
@@ -109,6 +146,18 @@ Runs containerized workloads on ECS Fargate. The cluster uses the Fargate capaci
 Deploys a VPC-attached Lambda function in private subnets. The function has its own security group (egress-only) and an IAM execution role with basic execution and VPC access policies. Source code is packaged from `modules/lambda/src/` and CloudWatch log retention is set to 14 days.
 
 **Key resources:** Lambda function, IAM role, security group, CloudWatch log group.
+
+### ECR (`./modules/ecr`)
+
+Provisions ECR repositories for all application container images. Each repository is named `{project_name}/{suffix}` and configured with image scanning on push and AES256 encryption. A lifecycle policy on each repository expires images beyond a configurable count to control storage costs.
+
+**Key resources:** ECR repositories, ECR lifecycle policies.
+
+### AgentCore (`./modules/agentcore`)
+
+Deploys an Amazon Bedrock AgentCore Runtime for running AI agents in VPC private subnets. The module provisions an ECR repository for agent container images, a security group (egress-only), and an IAM role trusted by the `bedrock-agentcore.amazonaws.com` service with ECR pull and Bedrock access permissions. The runtime uses container-based deployment and supports HTTP, MCP, and A2A protocols. Session lifecycle is configurable via idle timeout and max lifetime variables.
+
+**Key resources:** AgentCore runtime, ECR repository, ECR lifecycle policy, security group, IAM role, CloudWatch log group.
 
 ## CI/CD Pipeline Overview
 
@@ -142,7 +191,7 @@ flowchart TD
 
 ### Network Security
 
-- **Private subnets:** All compute resources (EKS nodes, EC2 instances, ECS tasks, Lambda) run in private subnets with no direct internet access.
+- **Private subnets:** All compute resources (EKS nodes, EC2 instances, ECS tasks, Lambda, AgentCore runtime) run in private subnets with no direct internet access.
 - **NAT egress only:** Private subnet resources reach the internet through a single shared NAT gateway (outbound only).
 - **Security groups:** Default deny-all with explicit allow rules. Only the ECS ALB security group allows inbound HTTP (port 80) from the internet. EC2 SSH is restricted to the VPC CIDR.
 
@@ -153,6 +202,7 @@ flowchart TD
   - **EC2:** Instance profile with SSM managed instance core policy.
   - **ECS:** Task execution role with the ECS task execution policy.
   - **Lambda:** Execution role with basic execution and VPC access policies.
+  - **AgentCore:** Runtime role trusted by `bedrock-agentcore.amazonaws.com` with ECR pull and Bedrock access policies.
 
 ### State Security
 
