@@ -42,17 +42,17 @@ module "vpc" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
+  version = "~> 21.0"
 
-  cluster_name    = "${var.project_name}-eks"
-  cluster_version = var.eks_cluster_version
+  name               = "${var.project_name}-eks"
+  kubernetes_version  = var.eks_cluster_version
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  cluster_endpoint_public_access = true
+  endpoint_public_access = true
 
-  cluster_enabled_log_types = ["audit", "api", "authenticator"]
+  enabled_log_types = ["audit", "api", "authenticator"]
 
   eks_managed_node_groups = {
     default = {

@@ -166,7 +166,7 @@ resource "aws_bedrockagentcore_agent_runtime" "main" {
     server_protocol = var.protocol
   }
 
-  lifecycle_configurations {
+  lifecycle_configuration {
     idle_runtime_session_timeout = var.idle_session_timeout
     max_lifetime                 = var.max_lifetime
   }
