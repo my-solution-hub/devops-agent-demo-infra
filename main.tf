@@ -45,7 +45,7 @@ module "eks" {
   version = "~> 21.0"
 
   name               = "${var.project_name}-eks"
-  kubernetes_version  = var.eks_cluster_version
+  kubernetes_version = var.eks_cluster_version
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
