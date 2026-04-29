@@ -1,21 +1,158 @@
-# Minimal VPC to validate the GitHub Actions OIDC pipeline
+# =============================================================================
+# ECR — Application Container Repositories
+# =============================================================================
 
-resource "aws_vpc" "test" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_support   = true
+module "ecr" {
+  source = "./modules/ecr"
+
+  project_name = var.project_name
+  ecr_prefix   = var.ecr_prefix
+  repositories = var.ecr_repositories
+  tags         = var.tags
+}
+
+# =============================================================================
+# VPC — terraform-aws-modules/vpc/aws
+# =============================================================================
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+
+  name = "${var.project_name}-vpc"
+  cidr = var.vpc_cidr
+
+  azs             = var.availability_zones
+  public_subnets  = var.public_subnet_cidrs
+  private_subnets = var.private_subnet_cidrs
+
+  enable_nat_gateway     = true
+  single_nat_gateway     = true
+  one_nat_gateway_per_az = false
+
   enable_dns_hostnames = true
+  enable_dns_support   = true
 
-  tags = {
-    Name = "aiops-demo-test-vpc"
+  tags = var.tags
+}
+
+# =============================================================================
+# EKS — terraform-aws-modules/eks/aws
+# =============================================================================
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.0"
+
+  name               = "${var.project_name}-eks"
+  kubernetes_version = var.eks_cluster_version
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  endpoint_public_access = true
+
+  enabled_log_types = ["audit", "api", "authenticator"]
+
+  eks_managed_node_groups = {
+    default = {
+      instance_types = var.eks_node_instance_types
+      min_size       = var.eks_node_min_size
+      max_size       = var.eks_node_max_size
+      desired_size   = var.eks_node_desired_size
+    }
+  }
+
+  tags = var.tags
+}
+
+# =============================================================================
+# Amazon Linux 2023 AMI Data Source (for EC2)
+# =============================================================================
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
   }
 }
 
-resource "aws_subnet" "test" {
-  vpc_id            = aws_vpc.test.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
+# =============================================================================
+# EC2 — Custom Module
+# =============================================================================
 
-  tags = {
-    Name = "aiops-demo-test-subnet"
-  }
+module "ec2" {
+  source = "./modules/ec2"
+
+  project_name       = var.project_name
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnets
+  instance_type      = var.ec2_instance_type
+  instance_count     = var.ec2_instance_count
+  ami_id             = data.aws_ami.amazon_linux.id
+  tags               = var.tags
+}
+
+# =============================================================================
+# ECS Fargate — Custom Module
+# =============================================================================
+
+module "ecs" {
+  source = "./modules/ecs"
+
+  project_name       = var.project_name
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnets
+  public_subnet_ids  = module.vpc.public_subnets
+  container_image    = var.ecs_container_image
+  container_port     = var.ecs_container_port
+  task_cpu           = var.ecs_task_cpu
+  task_memory        = var.ecs_task_memory
+  desired_count      = var.ecs_desired_count
+  tags               = var.tags
+}
+
+# =============================================================================
+# Lambda — Custom Module
+# =============================================================================
+
+module "lambda" {
+  source = "./modules/lambda"
+
+  project_name       = var.project_name
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnets
+  function_name      = "${var.project_name}-handler"
+  runtime            = var.lambda_runtime
+  memory_size        = var.lambda_memory_size
+  timeout            = var.lambda_timeout
+  tags               = var.tags
+}
+
+# =============================================================================
+# AgentCore — Custom Module (Bedrock AgentCore Runtime)
+# =============================================================================
+
+module "agentcore" {
+  source = "./modules/agentcore"
+
+  project_name          = var.project_name
+  vpc_id                = module.vpc.vpc_id
+  private_subnet_ids    = module.vpc.private_subnets
+  container_uri         = var.agentcore_container_uri
+  agent_runtime_name    = var.agentcore_runtime_name
+  description           = var.agentcore_description
+  protocol              = var.agentcore_protocol
+  environment_variables = var.agentcore_environment_variables
+  idle_session_timeout  = var.agentcore_idle_session_timeout
+  max_lifetime          = var.agentcore_max_lifetime
+  tags                  = var.tags
 }

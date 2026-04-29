@@ -71,6 +71,7 @@ resource "aws_iam_policy" "infra_deploy" {
           "ec2:RunInstances", "ec2:TerminateInstances", "ec2:DescribeInstances", "ec2:DescribeInstanceStatus",
           "ec2:DescribeImages", "ec2:DescribeKeyPairs",
           "ec2:DescribeInstanceTypes",
+          "ec2:CreateLaunchTemplate", "ec2:DeleteLaunchTemplate", "ec2:DescribeLaunchTemplates", "ec2:DescribeLaunchTemplateVersions", "ec2:CreateLaunchTemplateVersion",
         ]
         Resource = "*"
       },
@@ -83,6 +84,8 @@ resource "aws_iam_policy" "infra_deploy" {
           "eks:TagResource", "eks:UntagResource", "eks:ListClusters", "eks:ListNodegroups",
           "eks:CreateAccessEntry", "eks:DeleteAccessEntry", "eks:DescribeAccessEntry", "eks:ListAccessEntries",
           "eks:AssociateAccessPolicy", "eks:DisassociateAccessPolicy", "eks:ListAssociatedAccessPolicies",
+          "eks:CreateAddon", "eks:DeleteAddon", "eks:DescribeAddon", "eks:DescribeAddonVersions", "eks:UpdateAddon", "eks:DescribeAddonConfiguration",
+          "eks:AssociateIdentityProviderConfig", "eks:DisassociateIdentityProviderConfig", "eks:DescribeIdentityProviderConfig", "eks:ListIdentityProviderConfigs",
         ]
         Resource = "*"
       },
@@ -122,6 +125,10 @@ resource "aws_iam_policy" "infra_deploy" {
           "iam:TagRole", "iam:UntagRole", "iam:TagPolicy", "iam:UntagPolicy",
           "iam:CreateServiceLinkedRole",
           "iam:ListInstanceProfilesForRole",
+          "iam:CreateOpenIDConnectProvider", "iam:DeleteOpenIDConnectProvider", "iam:GetOpenIDConnectProvider",
+          "iam:TagOpenIDConnectProvider", "iam:UntagOpenIDConnectProvider",
+          "iam:AddClientIDToOpenIDConnectProvider", "iam:RemoveClientIDFromOpenIDConnectProvider",
+          "iam:UpdateOpenIDConnectProviderThumbprint",
         ]
         Resource = "*"
       },
@@ -148,6 +155,14 @@ resource "aws_iam_policy" "infra_deploy" {
         ]
         Resource = "*"
       },
+      {
+        Sid    = "STSIdentity"
+        Effect = "Allow"
+        Action = [
+          "sts:GetCallerIdentity",
+        ]
+        Resource = "*"
+      },
     ]
   })
 
@@ -164,4 +179,70 @@ resource "aws_iam_role_policy_attachment" "terraform_state" {
 resource "aws_iam_role_policy_attachment" "infra_deploy" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.infra_deploy.arn
+}
+
+# Policy 3: Bedrock AgentCore and ECR permissions
+resource "aws_iam_policy" "agentcore_deploy" {
+  name        = "${var.project_name}-agentcore-deploy"
+  description = "Permissions for deploying Bedrock AgentCore runtimes and reading ECR images"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "BedrockAgentCore"
+        Effect = "Allow"
+        Action = [
+          "bedrock-agentcore:CreateAgentRuntime",
+          "bedrock-agentcore:GetAgentRuntime",
+          "bedrock-agentcore:UpdateAgentRuntime",
+          "bedrock-agentcore:DeleteAgentRuntime",
+          "bedrock-agentcore:ListAgentRuntimes",
+          "bedrock-agentcore:ListAgentRuntimeVersions",
+          "bedrock-agentcore:CreateAgentRuntimeEndpoint",
+          "bedrock-agentcore:GetAgentRuntimeEndpoint",
+          "bedrock-agentcore:UpdateAgentRuntimeEndpoint",
+          "bedrock-agentcore:DeleteAgentRuntimeEndpoint",
+          "bedrock-agentcore:ListAgentRuntimeEndpoints",
+          "bedrock-agentcore:TagResource",
+          "bedrock-agentcore:UntagResource",
+          "bedrock-agentcore:ListTagsForResource",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ECRManagement"
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:DescribeRepositories",
+          "ecr:DescribeImages",
+          "ecr:ListImages",
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:CreateRepository",
+          "ecr:DeleteRepository",
+          "ecr:PutLifecyclePolicy",
+          "ecr:GetLifecyclePolicy",
+          "ecr:DeleteLifecyclePolicy",
+          "ecr:PutImageScanningConfiguration",
+          "ecr:GetRepositoryPolicy",
+          "ecr:SetRepositoryPolicy",
+          "ecr:DeleteRepositoryPolicy",
+          "ecr:TagResource",
+          "ecr:UntagResource",
+          "ecr:ListTagsForResource",
+        ]
+        Resource = "*"
+      },
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "agentcore_deploy" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.agentcore_deploy.arn
 }
