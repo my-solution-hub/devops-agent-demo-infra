@@ -16,12 +16,4 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
-
-  default_tags {
-    tags = {
-      Project     = "aiops-demo"
-      ManagedBy   = "terraform"
-      Environment = "dev"
-    }
-  }
 }
