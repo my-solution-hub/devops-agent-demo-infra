@@ -54,7 +54,7 @@ module "eks" {
 
   enabled_log_types = ["audit", "api", "authenticator"]
 
-  cluster_addons = {
+  addons = {
     vpc-cni    = { most_recent = true }
     coredns    = { most_recent = true }
     kube-proxy = { most_recent = true }
