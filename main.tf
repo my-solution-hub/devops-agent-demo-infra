@@ -54,6 +54,12 @@ module "eks" {
 
   enabled_log_types = ["audit", "api", "authenticator"]
 
+  cluster_addons = {
+    vpc-cni    = { most_recent = true }
+    coredns    = { most_recent = true }
+    kube-proxy = { most_recent = true }
+  }
+
   eks_managed_node_groups = {
     default = {
       instance_types = var.eks_node_instance_types
