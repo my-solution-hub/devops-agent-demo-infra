@@ -109,6 +109,7 @@ resource "aws_iam_policy" "infra_deploy" {
           "lambda:GetFunctionConfiguration", "lambda:ListFunctions",
           "lambda:AddPermission", "lambda:RemovePermission", "lambda:GetPolicy",
           "lambda:TagResource", "lambda:UntagResource", "lambda:ListTags",
+          "lambda:ListVersionsByFunction",
         ]
         Resource = "*"
       },
@@ -141,6 +142,7 @@ resource "aws_iam_policy" "infra_deploy" {
           "elasticloadbalancing:CreateListener", "elasticloadbalancing:DeleteListener", "elasticloadbalancing:DescribeListeners",
           "elasticloadbalancing:RegisterTargets", "elasticloadbalancing:DeregisterTargets", "elasticloadbalancing:DescribeTargetHealth",
           "elasticloadbalancing:AddTags", "elasticloadbalancing:RemoveTags", "elasticloadbalancing:DescribeTags",
+          "elasticloadbalancing:DescribeListenerAttributes",
         ]
         Resource = "*"
       },
