@@ -68,6 +68,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Debug OIDC claims
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Environment: production"
+          echo "Expected sub (env): repo:${{ github.repository }}:environment:production"
+          echo "Expected sub (ref): repo:${{ github.repository }}:ref:${{ github.ref }}"
+          echo "Role ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}"
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
