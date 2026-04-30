@@ -41,44 +41,44 @@ variable "ecr_repositories" {
   description = "Map of ECR repositories to create for application services"
   default = {
     api-gateway = {
-      description    = "API Gateway Service (Spring Boot)"
+      description    = "API Gateway Service - Spring Boot"
       compute_target = "EKS"
     }
     cat-profile = {
-      description    = "Cat Profile Service (Spring Boot)"
+      description    = "Cat Profile Service - Spring Boot"
       compute_target = "EKS"
     }
     feeding-service = {
-      description    = "Feeding Service (Django)"
-      compute_target = "ECS Fargate"
+      description    = "Feeding Service - Django"
+      compute_target = "ECS-Fargate"
     }
     health-monitor = {
-      description    = "Health Monitor Service (Django)"
-      compute_target = "ECS Fargate"
+      description    = "Health Monitor Service - Django"
+      compute_target = "ECS-Fargate"
     }
     device-service = {
-      description    = "Device Service (Go)"
+      description    = "Device Service - Go"
       compute_target = "Lambda"
     }
     chatbot-ui = {
-      description    = "Chatbot UI (React)"
-      compute_target = "ECS Fargate"
+      description    = "Chatbot UI - React"
+      compute_target = "ECS-Fargate"
     }
     device-simulator = {
-      description    = "Device Simulator (React)"
-      compute_target = "ECS Fargate"
+      description    = "Device Simulator - React"
+      compute_target = "ECS-Fargate"
     }
     admin-console = {
-      description    = "Admin Console (React)"
-      compute_target = "ECS Fargate"
+      description    = "Admin Console - React"
+      compute_target = "ECS-Fargate"
     }
     langgraph-agent = {
-      description    = "LangGraph Workflow Agent (Python)"
-      compute_target = "AgentCore Runtime"
+      description    = "LangGraph Workflow Agent - Python"
+      compute_target = "AgentCore-Runtime"
     }
     strands-agents = {
-      description    = "Strands Multi-Agent System (Python)"
-      compute_target = "AgentCore Runtime"
+      description    = "Strands Multi-Agent System - Python"
+      compute_target = "AgentCore-Runtime"
     }
   }
 }
