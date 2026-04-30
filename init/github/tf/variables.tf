@@ -20,6 +20,12 @@ variable "github_branch" {
   default     = "release"
 }
 
+variable "github_environment" {
+  type        = string
+  description = "GitHub Actions environment name allowed to assume the deploy role"
+  default     = "production"
+}
+
 variable "state_bucket_name" {
   type        = string
   description = "S3 bucket name for the main project's Terraform state"
