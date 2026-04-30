@@ -91,15 +91,15 @@ output "lambda_function_name" {
 # -----------------------------------------------------------------------------
 output "agentcore_runtime_arn" {
   description = "ARN of the AgentCore runtime"
-  value       = module.agentcore.agent_runtime_arn
+  value       = var.enable_agentcore ? module.agentcore[0].agent_runtime_arn : null
 }
 
 output "agentcore_runtime_id" {
   description = "Unique identifier of the AgentCore runtime"
-  value       = module.agentcore.agent_runtime_id
+  value       = var.enable_agentcore ? module.agentcore[0].agent_runtime_id : null
 }
 
 output "agentcore_ecr_repository_url" {
   description = "ECR repository URL for the agent container image"
-  value       = module.agentcore.ecr_repository_url
+  value       = var.enable_agentcore ? module.agentcore[0].ecr_repository_url : null
 }
