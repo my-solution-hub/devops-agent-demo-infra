@@ -276,6 +276,12 @@ variable "lambda_timeout" {
 # AgentCore
 # -----------------------------------------------------------------------------
 
+variable "enable_agentcore" {
+  type        = bool
+  description = "Whether to create AgentCore resources (set to true after ECR image is pushed)"
+  default     = false
+}
+
 variable "agentcore_container_uri" {
   type        = string
   description = "ECR URI of the agent container image for AgentCore runtime"
