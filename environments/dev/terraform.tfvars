@@ -11,7 +11,7 @@ public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
 private_subnet_cidrs = ["10.0.10.0/24", "10.0.20.0/24"]
 
 # EKS — smaller footprint for dev
-eks_cluster_version     = "1.32"
+eks_cluster_version     = "1.30"
 eks_node_instance_types = ["t3.medium"]
 eks_node_desired_size   = 2
 eks_node_min_size       = 1
