@@ -55,9 +55,9 @@ module "eks" {
   enabled_log_types = ["audit", "api", "authenticator"]
 
   addons = {
-    vpc-cni    = { most_recent = true }
-    coredns    = { most_recent = true }
-    kube-proxy = { most_recent = true }
+    vpc-cni    = { most_recent = true, resolve_conflicts_on_create = "OVERWRITE" }
+    coredns    = { most_recent = true, resolve_conflicts_on_create = "OVERWRITE" }
+    kube-proxy = { most_recent = true, resolve_conflicts_on_create = "OVERWRITE" }
   }
 
   eks_managed_node_groups = {
