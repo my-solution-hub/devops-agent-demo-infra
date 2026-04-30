@@ -156,6 +156,28 @@ resource "aws_iam_policy" "infra_deploy" {
         Resource = "*"
       },
       {
+        Sid    = "SSMParameters"
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "KMS"
+        Effect = "Allow"
+        Action = [
+          "kms:CreateKey", "kms:DescribeKey", "kms:GetKeyPolicy", "kms:GetKeyRotationStatus",
+          "kms:ListResourceTags", "kms:ScheduleKeyDeletion",
+          "kms:CreateAlias", "kms:DeleteAlias", "kms:ListAliases",
+          "kms:TagResource", "kms:UntagResource",
+          "kms:CreateGrant", "kms:ListGrants", "kms:RevokeGrant",
+          "kms:EnableKeyRotation",
+        ]
+        Resource = "*"
+      },
+      {
         Sid    = "STSIdentity"
         Effect = "Allow"
         Action = [
