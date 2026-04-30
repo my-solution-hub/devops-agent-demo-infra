@@ -50,6 +50,7 @@ jobs:
         with:
           working_directory: .
           soft_fail: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@v12
