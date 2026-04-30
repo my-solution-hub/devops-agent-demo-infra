@@ -12,3 +12,5 @@ override.tf.json
 
 # Actual tfvars (use .example as template)
 terraform.tfvars
+# But allow per-environment tfvars (no secrets, just config)
+!environments/*/terraform.tfvars
