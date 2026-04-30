@@ -45,12 +45,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install tfsec
+        run: |
+          curl -sL https://github.com/aquasecurity/tfsec/releases/download/v1.28.11/tfsec-linux-amd64 -o /usr/local/bin/tfsec
+          chmod +x /usr/local/bin/tfsec
+
       - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working_directory: .
-          soft_fail: false
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: tfsec . --soft-fail
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@v12
